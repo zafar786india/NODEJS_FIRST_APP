@@ -1,3 +1,22 @@
+
+//
+import React from 'react';
+
+const TodoItem = ({ todo, toggleTodo, deleteTodo }) => {
+    return (
+        <li>
+            <input 
+                type="checkbox" 
+                checked={todo.completed} 
+                onChange={() => toggleTodo(todo.id, !todo.completed)} 
+            />
+            {todo.text}
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+        </li>
+    );
+};
+
+export default TodoItem;
 //
 // TodoList.js
 import React from 'react';
