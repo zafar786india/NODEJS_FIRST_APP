@@ -1,3 +1,54 @@
+//
+
+// App.js (React Frontend)
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import TodoList from './TodoList';
+import TodoForm from './TodoForm';
+
+const App = () => {
+    const [todos, setTodos] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/todos')
+            .then(response => setTodos(response.data))
+            .catch(error => console.error(error));
+    }, []);
+
+    const addTodo = (text) => {
+        axios.post('http://localhost:5000/api/todos', { text })
+            .then(response => setTodos([...todos, response.data]))
+            .catch(error => console.error(error));
+    };
+
+    const toggleTodo = (id, completed) => {
+        axios.put(`http://localhost:5000/api/todos/${id}`, { completed })
+            .then(response => {
+                setTodos(todos.map(todo => todo.id === id ? response.data : todo));
+            })
+            .catch(error => console.error(error));
+    };
+
+    const deleteTodo = (id) => {
+        axios.delete(`http://localhost:5000/api/todos/${id}`)
+            .then(() => {
+                setTodos(todos.filter(todo => todo.id !== id));
+            })
+            .catch(error => console.error(error));
+    };
+
+    return (
+        <div className="app">
+            <h1>Todo App</h1>
+            <TodoForm addTodo={addTodo} />
+            <TodoList todos={todos} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
+        </div>
+    );
+};
+
+export default App;
+//
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TodoList from './components/TodoList';
