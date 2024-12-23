@@ -1,0 +1,101 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+
+// In-memory storage for data
+const data = [];
+
+// API Endpoints
+app.get('/api/data', (req, res) => {
+    res.json(data);
+});
+
+app.post('/api/data', (req, res) => {
+    const newData = req.body;
+    data.push(newData);
+    res.status(201).json(newData);
+});
+
+app.listen(5000, () => {
+    console.log('Server running on http://localhost:5000');
+});
+//
+context
+import React, { createContext, useState } from 'react';
+
+export const AppContext = createContext();
+
+export const AppProvider = ({ children }) => {
+    const [data, setData] = useState([]);
+
+    const addData = (newItem) => {
+        setData((prevData) => [...prevData, newItem]);
+    };
+
+    return (
+        <AppContext.Provider value={{ data, addData }}>
+            {children}
+        </AppContext.Provider>
+    );
+};
+app.js
+import React, { useContext, useEffect, useState } from 'react';
+import { AppContext, AppProvider } from './context/AppContext';
+
+const App = () => {
+    const { data, addData } = useContext(AppContext);
+    const [input, setInput] = useState('');
+
+    const fetchData = async () => {
+        const response = await fetch('http://localhost:5000/api/data');
+        const fetchedData = await response.json();
+        fetchedData.forEach(addData);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const newItem = { text: input };
+        await fetch('http://localhost:5000/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newItem),
+        });
+        addData(newItem);
+        setInput('');
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    return (
+        <div>
+            <h1>React & Node App with Context API</h1>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                />
+                <button type="submit">Add</button>
+            </form>
+            <ul>
+                {data.map((item, index) => (
+                    <li key={index}>{item.text}</li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+const AppWrapper = () => (
+    <AppProvider>
+        <App />
+    </AppProvider>
+);
+
+export default AppWrapper;
