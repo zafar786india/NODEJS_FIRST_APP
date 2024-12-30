@@ -1,0 +1,51 @@
+const WebSocket = require('ws');
+const express = require('express');
+const http = require('http');
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+// Mock function to simulate API responses
+function mockBookingAPI(ws) {
+  setTimeout(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ status: 'processing', message: 'Your booking is being processed.' }));
+    }
+  }, 2000); // Simulate delay for processing
+
+  setTimeout(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ status: 'confirmed', message: 'Your booking is confirmed.' }));
+    }
+  }, 5000); // Simulate delay for confirmation
+}
+
+// WebSocket connection handler
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+
+  ws.on('message', (message) => {
+    console.log('Received:', message);
+    
+    // Simulate API behavior based on received message
+    const data = JSON.parse(message);
+    if (data.action === 'startBooking') {
+      mockBookingAPI(ws);
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Basic HTTP server for WebSocket handshake
+app.get('/', (req, res) => {
+  res.send('WebSocket server is running. Connect via WebSocket client.');
+});
+
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`Server is listening on http://localhost:${PORT}`);
+});
